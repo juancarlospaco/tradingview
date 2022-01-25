@@ -1,2 +1,0 @@
-# tradingview
-TradingView client
