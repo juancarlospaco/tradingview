@@ -23,15 +23,18 @@ type
 
   Screener* {.pure.} = enum   ## Screeners, currently only Crypto.
     Crypto  = "CRYPTO"        ## Crypto currencies.
-    # Forex   = "FOREX"       ## Forex (untested).
-    # America = "AMERICA"     ## USA Market (untested).
-    # Cfd     = "CFD"         ## Contract For Differences (untested).
+    Forex   = "FOREX"         ## Forex (untested).
+    America = "AMERICA"       ## USA Market (untested).
+    Cfd     = "CFD"           ## Contract For Differences (untested).
 
   Exchange* {.pure.} = enum   ## Exchanges, currently only Binance.
     Binance  = "BINANCE"      ## Crypto currencies.
-    # Coinbase = "COINBASE"   ## Crypto currencies (untested, use Binance).
-    # Fx_Idc   = "FX_IDC"     ## FX_IDC for Forex (untested).
-    # Tvc      = "TVC"        ## TVC for Contract For Differences (untested).
+    Coinbase = "COINBASE"     ## Crypto currencies (untested, use Binance).
+    BITTREX = "BITTREX"       ## Crypto currencies (untested, use Binance).
+    Fx_Idc   = "FX_IDC"       ## FX_IDC for Forex (untested).
+    Tvc      = "TVC"          ## TVC for Contract For Differences (untested).
+    NASDAQ = "NASDAQ"         ## NASDAQ for USA Market (untested).
+    NYSE = "NYSE"             ## NYSE for USA Market (untested).
 
   Indicators* {.pure.} = enum ## Technical analysis indicators.
     RecommendOther = "Recommend.Other"
