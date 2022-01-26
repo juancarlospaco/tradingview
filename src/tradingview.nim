@@ -291,17 +291,11 @@ template toString*(interval: Interval): string =
   of INTERVAL1MONTH:    "|1M"
   of INTERVAL1DAY:      ""  # Default is 1 day.
 
-
-func newTradingView*(symbol: string; timeout: Positive; interval = INTERVAL1DAY; indicators: set[Indicators]): TradingView =
+func newTradingView*(symbol: string; timeout: Positive; interval = INTERVAL1DAY; indicators: set[Indicators]): TradingView {.inline.} =
   ## Constructor for `TradingView`.
-  result.screener = Screener.Crypto
-  result.exchange = Exchange.Binance
-  result.symbol = symbol
-  result.interval = interval
-  result.timeout = timeout
-  result.indicators = indicators
+  TradingView(screener: Screener.Crypto, exchange: Exchange.Binance, symbol: symbol, interval: interval, timeout: timeout, indicators: indicators)
 
-func tradingViewData*(exchangeSymbols: seq[string]; indicators: seq[Indicators]; interval: Interval): JsonNode =
+func tradingViewData*(exchangeSymbols: seq[string]; indicators: set[Indicators]; interval: Interval): JsonNode =
   ## Format TradingView Scanner Post Data.
   ## * `exchangeSymbols` example `@["BINANCE:BTCUSDT", "BINANCE:ETHBUSD"]`, indicators must be all uppercase.
   assert exchangeSymbols.len > 0, "exchangeSymbols must not be a an empty seq."
@@ -317,7 +311,6 @@ func tradingViewData*(exchangeSymbols: seq[string]; indicators: seq[Indicators];
     },
     "columns": columns
   }
-
 
 
 
@@ -432,38 +425,38 @@ func getAnalysis(self: TradingView): Analysis =
 
 
 
-    def get_indicators(self, indicators=[]):
-        """
-        Args:
-            indicators (list, optional): List of string of indicators (ex: ["RSI7", "open"]). Defaults to self.indicators.
-        Returns:
-            dict: A dictionary with a format of {"indicator": value}.
-        """
-        if len(indicators) == 0:
-            indicators = self.indicators
+def get_indicators(self, indicators=[]):
+    """
+    Args:
+        indicators (list, optional): List of string of indicators (ex: ["RSI7", "open"]). Defaults to self.indicators.
+    Returns:
+        dict: A dictionary with a format of {"indicator": value}.
+    """
+    if len(indicators) == 0:
+        indicators = self.indicators
 
-        if self.screener == "" or type(self.screener) != str:
-            raise Exception("Screener is empty or not valid.")
-        elif self.exchange == "" or type(self.exchange) != str:
-            raise Exception("Exchange is empty or not valid.")
-        elif self.symbol == "" or type(self.symbol) != str:
-            raise Exception("Symbol is empty or not valid.")
+    if self.screener == "" or type(self.screener) != str:
+        raise Exception("Screener is empty or not valid.")
+    elif self.exchange == "" or type(self.exchange) != str:
+        raise Exception("Exchange is empty or not valid.")
+    elif self.symbol == "" or type(self.symbol) != str:
+        raise Exception("Symbol is empty or not valid.")
 
-        exchange_symbol = f"{self.exchange}:{self.symbol}"
-        data = TradingView.data([exchange_symbol], self.interval, indicators)
-        scan_url = f"{TradingView.scan_url}{self.screener.lower()}/scan"
-        headers = {"User-Agent": "tradingview_ta/{}".format(__version__)}
-        response = requests.post(scan_url,json=data, headers=headers, timeout=self.timeout, proxies=self.proxies)
+    exchange_symbol = f"{self.exchange}:{self.symbol}"
+    data = TradingView.data([exchange_symbol], self.interval, indicators)
+    scan_url = f"{TradingView.scan_url}{self.screener.lower()}/scan"
+    headers = {"User-Agent": "tradingview_ta/{}".format(__version__)}
+    response = requests.post(scan_url,json=data, headers=headers, timeout=self.timeout, proxies=self.proxies)
 
-        # Return False if can't get data
-        if response.status_code != 200:
-            raise Exception("Can't access TradingView's API. HTTP status code: {}. Check for invalid symbol, exchange, or indicators.".format(response.status_code))
+    # Return False if can't get data
+    if response.status_code != 200:
+        raise Exception("Can't access TradingView's API. HTTP status code: {}. Check for invalid symbol, exchange, or indicators.".format(response.status_code))
 
-        result = json.loads(response.text)["data"]
-        if result != []:
-            indicators_val = {}
-            for x in range(len(indicators)):
-                indicators_val[indicators[x]] = result[0]["d"][x]
-            return indicators_val
-        else:
-            raise Exception("Exchange or symbol not found.")
+    result = json.loads(response.text)["data"]
+    if result != []:
+        indicators_val = {}
+        for x in range(len(indicators)):
+            indicators_val[indicators[x]] = result[0]["d"][x]
+        return indicators_val
+    else:
+        raise Exception("Exchange or symbol not found.")
