@@ -1,14 +1,15 @@
 ## https://TradingView.com client.
+import std/[strutils, json]
 
 type
-  Recommendation* = enum  ## Buy or Sell ?.
+  Recommendation* {.pure.} = enum      ## Buy or Sell ?.
     buy        = "BUY"
     strongBuy  = "STRONG_BUY"
     sell       = "SELL"
     strongSell = "STRONG_SELL"
     neutral    = "NEUTRAL"
 
-  Interval* = enum        ## Time intervals.
+  Interval* {.pure.} = enum            ## Time intervals.
     INTERVAL1MINUTE   = "1m"
     INTERVAL5MINUTES  = "5m"
     INTERVAL15MINUTES = "15m"
@@ -20,329 +21,207 @@ type
     INTERVAL1WEEK     = "1W"
     INTERVAL1MONTH    = "1M"
 
-  Screener* = enum        ## Screeners, currently only Crypto.
-    Crypto  = "CRYPTO"    ## Crypto currencies.
-    # Forex   = "FOREX"     ## Forex (untested).
-    # America = "AMERICA"   ## USA Market (untested).
-    # Cfd     = "CFD"       ## Contract For Differences (untested).
+  Screener* {.pure.} = enum   ## Screeners, currently only Crypto.
+    Crypto  = "CRYPTO"        ## Crypto currencies.
+    # Forex   = "FOREX"       ## Forex (untested).
+    # America = "AMERICA"     ## USA Market (untested).
+    # Cfd     = "CFD"         ## Contract For Differences (untested).
 
-  Exchange* = enum        ## Exchanges, currently only Binance.
-    Binance  = "BINANCE"  ## Crypto currencies.
-    # Coinbase = "COINBASE" ## Crypto currencies (untested, use Binance).
-    # Fx_Idc   = "FX_IDC"   ## FX_IDC for Forex (untested).
-    # Tvc      = "TVC"      ## TVC for Contract For Differences (untested).
+  Exchange* {.pure.} = enum   ## Exchanges, currently only Binance.
+    Binance  = "BINANCE"      ## Crypto currencies.
+    # Coinbase = "COINBASE"   ## Crypto currencies (untested, use Binance).
+    # Fx_Idc   = "FX_IDC"     ## FX_IDC for Forex (untested).
+    # Tvc      = "TVC"        ## TVC for Contract For Differences (untested).
 
-  TradingView* = object   ## TradingView client.
-    screener: Screener    ## Screener, currently only Crypto.
-    exchange: Exchange    ## Exchange to use, currently only Binance.
-    symbol: string        ## Symbol (e.g. "BTCUSDT", "ETHBUSD", "DOGEDAI", etc).
-    interval: Interval    ## Time interval to use (e.g. "1m", "5m", "15m", "30m", "1h", "2h", "4h", "1d", "1W", "1M").
-    timeout: Positive     ## Timeout.
-    indicators: seq[Indicators]  ## Indicators to be used in the chart (e.g. "SMA", "EMA", "MACD", etc).
+  Indicators* {.pure.} = enum ## Technical analysis indicators.
+    RecommendOther = "Recommend.Other"
+    RecommendAll = "Recommend.All"
+    RecommendMA = "Recommend.MA"
+    RSI = "RSI"
+    RSI1 = "RSI[1]"
+    StochK = "Stoch.K"
+    StochD = "Stoch.D"
+    StochK1 = "Stoch.K[1]"
+    StochD1 = "Stoch.D[1]"
+    CCI20 = "CCI20"
+    CCI201 = "CCI20[1]"
+    ADX = "ADX"
+    ADXplusDI = "ADX+DI"
+    ADXminusDI = "ADX-DI"
+    ADXplusDI1 = "ADX+DI[1]"
+    ADXminusDI1 = "ADX-DI[1]"
+    AO = "AO"
+    AO1 = "AO[1]"
+    Mom = "Mom"
+    Mom1 = "Mom[1]"
+    MACDmacd = "MACD.macd"
+    MACDsignal = "MACD.signal"
+    RecStochRSI = "Rec.Stoch.RSI"
+    StochRSIK = "Stoch.RSI.K"
+    RecWR = "Rec.WR"
+    WR = "W.R"
+    RecBBPower = "Rec.BBPower"
+    BBPower = "BBPower"
+    RecUO = "Rec.UO"
+    UO = "UO"
+    close = "close"
+    EMA5 = "EMA5"
+    SMA5 = "SMA5"
+    EMA10 = "EMA10"
+    SMA10 = "SMA10"
+    EMA20 = "EMA20"
+    SMA20 = "SMA20"
+    EMA30 = "EMA30"
+    SMA30 = "SMA30"
+    EMA50 = "EMA50"
+    SMA50 = "SMA50"
+    EMA100 = "EMA100"
+    SMA100 = "SMA100"
+    EMA200 = "EMA200"
+    SMA200 = "SMA200"
+    RecIchimoku = "Rec.Ichimoku"
+    IchimokuBLine = "Ichimoku.BLine"
+    RecVWMA = "Rec.VWMA"
+    VWMA = "VWMA"
+    RecHullMA9 = "Rec.HullMA9"
+    HullMA9 = "HullMA9"
+    PivotMClassicS3 = "Pivot.M.Classic.S3"
+    PivotMClassicS2 = "Pivot.M.Classic.S2"
+    PivotMClassicS1 = "Pivot.M.Classic.S1"
+    PivotMClassicMiddle = "Pivot.M.Classic.Middle"
+    PivotMClassicR1 = "Pivot.M.Classic.R1"
+    PivotMClassicR2 = "Pivot.M.Classic.R2"
+    PivotMClassicR3 = "Pivot.M.Classic.R3"
+    PivotMFibonacciS3 = "Pivot.M.Fibonacci.S3"
+    PivotMFibonacciS2 = "Pivot.M.Fibonacci.S2"
+    PivotMFibonacciS1 = "Pivot.M.Fibonacci.S1"
+    PivotMFibonacciMiddle = "Pivot.M.Fibonacci.Middle"
+    PivotMFibonacciR1 = "Pivot.M.Fibonacci.R1"
+    PivotMFibonacciR2 = "Pivot.M.Fibonacci.R2"
+    PivotMFibonacciR3 = "Pivot.M.Fibonacci.R3"
+    PivotMCamarillaS3 = "Pivot.M.Camarilla.S3"
+    PivotMCamarillaS2 = "Pivot.M.Camarilla.S2"
+    PivotMCamarillaS1 = "Pivot.M.Camarilla.S1"
+    PivotMCamarillaMiddle = "Pivot.M.Camarilla.Middle"
+    PivotMCamarillaR1 = "Pivot.M.Camarilla.R1"
+    PivotMCamarillaR2 = "Pivot.M.Camarilla.R2"
+    PivotMCamarillaR3 = "Pivot.M.Camarilla.R3"
+    PivotMWoodieS3 = "Pivot.M.Woodie.S3"
+    PivotMWoodieS2 = "Pivot.M.Woodie.S2"
+    PivotMWoodieS1 = "Pivot.M.Woodie.S1"
+    PivotMWoodieMiddle = "Pivot.M.Woodie.Middle"
+    PivotMWoodieR1 = "Pivot.M.Woodie.R1"
+    PivotMWoodieR2 = "Pivot.M.Woodie.R2"
+    PivotMWoodieR3 = "Pivot.M.Woodie.R3"
+    PivotMDemarkS1 = "Pivot.M.Demark.S1"
+    PivotMDemarkMiddle = "Pivot.M.Demark.Middle"
+    PivotMDemarkR1 = "Pivot.M.Demark.R1"
+    open = "open"
+    PSAR = "P.SAR"
+    BBlower = "BB.lower"
+    BBupper = "BB.upper"
+    AO2 = "AO[2]"
+    volume = "volume"
+    change = "change"
+    name = "name"
+    changeabs = "change_abs"
+    exchange = "exchange"
+    High1M = "High.1M"
+    Low1M = "Low.1M"
+    High3M = "High.3M"
+    Low3M = "Low.3M"
+    Perf3M = "Perf.3M"
+    price52weekhigh = "price_52_week_high"
+    price52weeklow = "price_52_week_low"
+    High6M = "High.6M"
+    Low6M = "Low.6M"
+    Perf6M = "Perf.6M"
+    HighAll = "High.All"
+    LowAll = "Low.All"
+    AroonDown = "Aroon.Down"
+    AroonUp = "Aroon.Up"
+    ADR = "ADR"
+    ATR = "ATR"
+    averagevolume10dcalc = "average_volume_10d_calc"
+    PerfY = "Perf.Y"
+    PerfYTD = "Perf.YTD"
+    averagevolume30dcalc = "average_volume_30d_calc"
+    averagevolume60dcalc = "average_volume_60d_calc"
+    averagevolume90dcalc = "average_volume_90d_calc"
+    changeabs15 = "change_abs|15"
+    change15 = "change|15"
+    changeabs60 = "change_abs|60"
+    change60 = "change|60"
+    changeabs1 = "change_abs|1"
+    change1 = "change|1"
+    changeabs240 = "change_abs|240"
+    change240 = "change|240"
+    changeabs5 = "change_abs|5"
+    change5 = "change|5"
+    changefromopenabs = "change_from_open_abs"
+    changefromopen = "change_from_open"
+    DonchCh20Lower = "DonchCh20.Lower"
+    DonchCh20Upper = "DonchCh20.Upper"
+    gap = "gap"
+    IchimokuCLine = "Ichimoku.CLine"
+    IchimokuLead1 = "Ichimoku.Lead1"
+    IchimokuLead2 = "Ichimoku.Lead2"
+    KltChnllower = "KltChnl.lower"
+    KltChnlupper = "KltChnl.upper"
+    marketcapcalc = "market_cap_calc"
+    Perf1M = "Perf.1M"
+    ROC = "ROC"
+    RSI7 = "RSI7"
+    relativevolume10dcalc = "relative_volume_10d_calc"
+    StochRSID = "Stoch.RSI.D"
+    VolatilityD = "Volatility.D"
+    VolatilityM = "Volatility.M"
+    VolatilityW = "Volatility.W"
+    VWAP = "VWAP"
+    PerfW = "Perf.W"
+    description = "description"
+    subtype = "subtype"
+    updatemode = "update_mode"
+    pricescale = "pricescale"
+    minmov = "minmov"
+    fractional = "fractional"
+    minmove2 = "minmove2"
+    ADXDI = "ADX-DI[1]"
+    CandleAbandonedBabyBearish = "Candle.AbandonedBaby.Bearish"
+    CandleAbandonedBabyBullish = "Candle.AbandonedBaby.Bullish"
+    CandleEngulfingBearish = "Candle.Engulfing.Bearish"
+    CandleHaramiBearish = "Candle.Harami.Bearish"
+    CandleEngulfingBullish = "Candle.Engulfing.Bullish"
+    CandleHaramiBullish = "Candle.Harami.Bullish"
+    CandleDoji = "Candle.Doji"
+    CandleDojiDragonfly = "Candle.Doji.Dragonfly"
+    CandleEveningStar = "Candle.EveningStar"
+    CandleDojiGravestone = "Candle.Doji.Gravestone"
+    CandleHammer = "Candle.Hammer"
+    CandleHangingMan = "Candle.HangingMan"
+    CandleInvertedHammer = "Candle.InvertedHammer"
+    CandleKickingBearish = "Candle.Kicking.Bearish"
+    CandleKickingBullish = "Candle.Kicking.Bullish"
+    CandleLongShadowLower = "Candle.LongShadow.Lower"
+    CandleLongShadowUpper = "Candle.LongShadow.Upper"
+    CandleMarubozuBlack = "Candle.Marubozu.Black"
+    CandleMarubozuWhite = "Candle.Marubozu.White"
+    CandleMorningStar = "Candle.MorningStar"
+    CandleShootingStar = "Candle.ShootingStar"
+    CandleSpinningTopBlack = "Candle.SpinningTop.Black"
+    CandleSpinningTopWhite = "Candle.SpinningTop.White"
+    Candle3BlackCrows = "Candle.3BlackCrows"
+    Candle3WhiteSoldiers = "Candle.3WhiteSoldiers"
+    CandleTriStarBearish = "Candle.TriStar.Bearish"
+    CandleTriStarBullish = "Candle.TriStar.Bullish"
 
-  # TODO: make an enum for the following.
-  Indicators* = enum      ## Technical analysis indicators.
-    "Recommend.Other",
-    "Recommend.All",
-    "Recommend.MA",
-    "RSI",
-    "RSI[1]",
-    "Stoch.K",
-    "Stoch.D",
-    "Stoch.K[1]",
-    "Stoch.D[1]",
-    "CCI20",
-    "CCI20[1]",
-    "ADX",
-    "ADX+DI",
-    "ADX-DI",
-    "ADX+DI[1]",
-    "ADX-DI[1]",
-    "AO",
-    "AO[1]",
-    "Mom",
-    "Mom[1]",
-    "MACD.macd",
-    "MACD.signal",
-    "Rec.Stoch.RSI",
-    "Stoch.RSI.K",
-    "Rec.WR",
-    "W.R",
-    "Rec.BBPower",
-    "BBPower",
-    "Rec.UO",
-    "UO",
-    "close",
-    "EMA5",
-    "SMA5",
-    "EMA10",
-    "SMA10",
-    "EMA20",
-    "SMA20",
-    "EMA30",
-    "SMA30",
-    "EMA50",
-    "SMA50",
-    "EMA100",
-    "SMA100",
-    "EMA200",
-    "SMA200",
-    "Rec.Ichimoku",
-    "Ichimoku.BLine",
-    "Rec.VWMA",
-    "VWMA",
-    "Rec.HullMA9",
-    "HullMA9",
-    "Pivot.M.Classic.S3",
-    "Pivot.M.Classic.S2",
-    "Pivot.M.Classic.S1",
-    "Pivot.M.Classic.Middle",
-    "Pivot.M.Classic.R1",
-    "Pivot.M.Classic.R2",
-    "Pivot.M.Classic.R3",
-    "Pivot.M.Fibonacci.S3",
-    "Pivot.M.Fibonacci.S2",
-    "Pivot.M.Fibonacci.S1",
-    "Pivot.M.Fibonacci.Middle",
-    "Pivot.M.Fibonacci.R1",
-    "Pivot.M.Fibonacci.R2",
-    "Pivot.M.Fibonacci.R3",
-    "Pivot.M.Camarilla.S3",
-    "Pivot.M.Camarilla.S2",
-    "Pivot.M.Camarilla.S1",
-    "Pivot.M.Camarilla.Middle",
-    "Pivot.M.Camarilla.R1",
-    "Pivot.M.Camarilla.R2",
-    "Pivot.M.Camarilla.R3",
-    "Pivot.M.Woodie.S3",
-    "Pivot.M.Woodie.S2",
-    "Pivot.M.Woodie.S1",
-    "Pivot.M.Woodie.Middle",
-    "Pivot.M.Woodie.R1",
-    "Pivot.M.Woodie.R2",
-    "Pivot.M.Woodie.R3",
-    "Pivot.M.Demark.S1",
-    "Pivot.M.Demark.Middle",
-    "Pivot.M.Demark.R1",
-    "open",
-    "P.SAR",
-    "BB.lower",
-    "BB.upper",
-    "AO[2]",
-    "volume",
-    "change",
-    "low",
-    "high",
-
-  "name",
-  "change",
-  "close",
-  "change_abs",
-  "high",
-  "low",
-  "volume",
-  "Recommend.All",
-  "exchange",
-  "High.1M",
-  "Low.1M",
-  "Pivot.M.Camarilla.Middle",
-  "Pivot.M.Camarilla.R1",
-  "Pivot.M.Camarilla.R2",
-  "Pivot.M.Camarilla.R3",
-  "Pivot.M.Camarilla.S1",
-  "Pivot.M.Camarilla.S2",
-  "Pivot.M.Camarilla.S3",
-  "Pivot.M.Classic.Middle",
-  "Pivot.M.Classic.R1",
-  "Pivot.M.Classic.R2",
-  "Pivot.M.Classic.R3",
-  "Pivot.M.Classic.S1",
-  "Pivot.M.Classic.S2",
-  "Pivot.M.Classic.S3",
-  "Pivot.M.Demark.Middle",
-  "Pivot.M.Demark.R1",
-  "Pivot.M.Demark.S1",
-  "Pivot.M.Fibonacci.Middle",
-  "Pivot.M.Fibonacci.R1",
-  "Pivot.M.Fibonacci.R2",
-  "Pivot.M.Fibonacci.R3",
-  "Pivot.M.Fibonacci.S1",
-  "Pivot.M.Fibonacci.S2",
-  "Pivot.M.Fibonacci.S3",
-  "Pivot.M.Woodie.Middle",
-  "Pivot.M.Woodie.R1",
-  "Pivot.M.Woodie.R2",
-  "Pivot.M.Woodie.R3",
-  "Pivot.M.Woodie.S1",
-  "Pivot.M.Woodie.S2",
-  "Pivot.M.Woodie.S3",
-  "High.3M",
-  "Low.3M",
-  "Perf.3M",
-  "price_52_week_high",
-  "price_52_week_low",
-  "High.6M",
-  "Low.6M",
-  "Perf.6M",
-  "High.All",
-  "Low.All",
-  "Aroon.Down",
-  "Aroon.Up",
-  "ADR",
-  "ADX",
-  "ATR",
-  "average_volume_10d_calc",
-  "Perf.Y",
-  "Perf.YTD",
-  "W.R",
-  "average_volume_30d_calc",
-  "average_volume_60d_calc",
-  "average_volume_90d_calc",
-  "AO",
-  "BB.lower",
-  "BB.upper",
-  "BBPower",
-  "change_abs|15",
-  "change|15",
-  "change_abs|60",
-  "change|60",
-  "change_abs|1",
-  "change|1",
-  "change_abs|240",
-  "change|240",
-  "change_abs|5",
-  "change|5",
-  "change_from_open_abs",
-  "change_from_open",
-  "CCI20",
-  "DonchCh20.Lower",
-  "DonchCh20.Upper",
-  "EMA10",
-  "EMA100",
-  "EMA20",
-  "EMA200",
-  "EMA30",
-  "EMA5",
-  "EMA50",
-  "gap",
-  "HullMA9",
-  "Ichimoku.BLine",
-  "Ichimoku.CLine",
-  "Ichimoku.Lead1",
-  "Ichimoku.Lead2",
-  "KltChnl.lower",
-  "KltChnl.upper",
-  "MACD.macd",
-  "MACD.signal",
-  "market_cap_calc",
-  "Mom",
-  "Perf.1M",
-  "Recommend.MA",
-  "open",
-  "Recommend.Other",
-  "P.SAR",
-  "name",
-  "ROC",
-  "RSI",
-  "RSI7",
-  "relative_volume_10d_calc",
-  "SMA10",
-  "SMA100",
-  "SMA20",
-  "SMA200",
-  "SMA30",
-  "SMA5",
-  "SMA50",
-  "Stoch.D",
-  "Stoch.K",
-  "Stoch.RSI.K",
-  "Stoch.RSI.D",
-  "UO",
-  "Volatility.D",
-  "Volatility.M",
-  "Volatility.W",
-  "VWAP",
-  "VWMA",
-  "Perf.W",
-  "description",
-  "name",
-  "type",
-  "subtype",
-  "update_mode",
-  "pricescale",
-  "minmov",
-  "fractional",
-  "minmove2",
-  "ADX-DI[1]",
-  "Rec.WR",
-  "AO",
-  "AO[1]",
-  "close",
-  "BB.lower",
-  "BB.upper",
-  "Rec.BBPower",
-  "CCI20",
-  "CCI20[1]",
-  "EMA10",
-  "EMA100",
-  "EMA20",
-  "EMA200",
-  "EMA30",
-  "EMA5",
-  "EMA50",
-  "Rec.HullMA9",
-  "Rec.Ichimoku",
-  "MACD.macd",
-  "MACD.signal",
-  "Mom",
-  "Mom[1]",
-  "P.SAR",
-  "open",
-  "Candle.AbandonedBaby.Bearish",
-  "Candle.AbandonedBaby.Bullish",
-  "Candle.Engulfing.Bearish",
-  "Candle.Harami.Bearish",
-  "Candle.Engulfing.Bullish",
-  "Candle.Harami.Bullish",
-  "Candle.Doji",
-  "Candle.Doji.Dragonfly",
-  "Candle.EveningStar",
-  "Candle.Doji.Gravestone",
-  "Candle.Hammer",
-  "Candle.HangingMan",
-  "Candle.InvertedHammer",
-  "Candle.Kicking.Bearish",
-  "Candle.Kicking.Bullish",
-  "Candle.LongShadow.Lower",
-  "Candle.LongShadow.Upper",
-  "Candle.Marubozu.Black",
-  "Candle.Marubozu.White",
-  "Candle.MorningStar",
-  "Candle.ShootingStar",
-  "Candle.SpinningTop.Black",
-  "Candle.SpinningTop.White",
-  "Candle.3BlackCrows",
-  "Candle.3WhiteSoldiers",
-  "Candle.TriStar.Bearish",
-  "Candle.TriStar.Bullish",
-  "RSI",
-  "RSI[1]",
-  "RSI7",
-  "RSI7[1]",
-  "SMA10",
-  "SMA100",
-  "SMA20",
-  "SMA200",
-  "SMA30",
-  "SMA5",
-  "SMA50",
-  "Stoch.K",
-  "Stoch.D",
-  "Stoch.K[1]",
-  "Stoch.D[1]",
-  "Rec.Stoch.RSI",
-  "Rec.UO",
-  "Rec.VWMA",
+  TradingView* = object         ## TradingView client.
+    screener: Screener          ## Screener, currently only Crypto.
+    exchange: Exchange          ## Exchange to use, currently only Binance.
+    symbol: string              ## Symbol (e.g. "BTCUSDT", "ETHBUSD", "DOGEDAI", etc).
+    interval: Interval          ## Time interval to use (e.g. "1m", "5m", "15m", "30m", "1h", "2h", "4h", "1d", "1W", "1M").
+    timeout: Positive           ## Timeout.
+    indicators: set[Indicators] ## Indicators to be used in the chart (e.g. "SMA", "EMA", "MACD", etc).
 
 const tradingviewAPIUrl: string = "https://scanner.tradingview.com/"
 
@@ -412,12 +291,22 @@ template toString*(interval: Interval): string =
   of INTERVAL1MONTH:    "|1M"
   of INTERVAL1DAY:      ""  # Default is 1 day.
 
+
+func newTradingView*(symbol: string; timeout: Positive; interval = INTERVAL1DAY; indicators: set[Indicators]): TradingView =
+  ## Constructor for `TradingView`.
+  result.screener = Screener.Crypto
+  result.exchange = Exchange.Binance
+  result.symbol = symbol
+  result.interval = interval
+  result.timeout = timeout
+  result.indicators = indicators
+
 func tradingViewData*(exchangeSymbols: seq[string]; indicators: seq[Indicators]; interval: Interval): JsonNode =
   ## Format TradingView Scanner Post Data.
   ## * `exchangeSymbols` example `@["BINANCE:BTCUSDT", "BINANCE:ETHBUSD"]`, indicators must be all uppercase.
   assert exchangeSymbols.len > 0, "exchangeSymbols must not be a an empty seq."
   assert indicators.len > 0, "indicators must not be a an empty seq."
-  var columns: seq[string] = newSeqOfCap(indicators.len)
+  var columns: seq[string] = newSeqOfCap[string](indicators.len)
   for indicator in indicators: columns.add($indicator & interval.toString)
   result = %*{
     "symbols": {
@@ -428,6 +317,9 @@ func tradingViewData*(exchangeSymbols: seq[string]; indicators: seq[Indicators];
     },
     "columns": columns
   }
+
+
+
 
 
 func calculate*(indicators, indicators_key, screener, symbol, exchange, interval):
@@ -532,21 +424,13 @@ func calculate*(indicators, indicators_key, screener, symbol, exchange, interval
 
     return analysis
 
-class TA_Handler(object):  # Esta clase es el type TradingView !
-    screener = ""
-    exchange = ""
-    symbol = ""
-    interval = ""
-    timeout = None
 
-    indicators = TradingView.indicators.copy()
 
-    def __init__(self, screener="", exchange="", symbol="", interval="", timeout=None, proxies=None):
-        self.screener = screener
-        self.exchange = exchange
-        self.symbol = symbol
-        self.interval = interval
-        self.timeout = timeout
+func getAnalysis(self: TradingView): Analysis =
+  ## Get analysis from TradingView.
+  calculate(indicators=self.get_indicators(), indicators_key=self.indicators, screener=self.screener, symbol=self.symbol, exchange=self.exchange, interval=self.interval)
+
+
 
     def get_indicators(self, indicators=[]):
         """
@@ -583,11 +467,3 @@ class TA_Handler(object):  # Esta clase es el type TradingView !
             return indicators_val
         else:
             raise Exception("Exchange or symbol not found.")
-
-    def get_analysis(self):
-        """Get analysis from TradingView and compute it.
-        Returns:
-            Analysis: Contains information about the analysis.
-        """
-
-        return calculate(indicators=self.get_indicators(), indicators_key=self.indicators, screener=self.screener, symbol=self.symbol, exchange=self.exchange, interval=self.interval)
