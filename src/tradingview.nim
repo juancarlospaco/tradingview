@@ -474,3 +474,11 @@ runnableExamples"-d:ssl -d:nimDisableCertificateValidation":
   doAssert indicators.len == 180
   let trading = newTradingView(symbol = "BTCUSDT", timeout = 999.Positive, indicators = indicators)
   echo "BTCUSDT\n", trading.getAnalysis()
+
+
+## .. code:: nim
+##   (
+##     summary: (recommendation: NEUTRAL, buy: 2, sell: 1, neutral: 8, compute: {"MACD": SELL, "CCI": NEUTRAL, "RSI": NEUTRAL, "BBP": NEUTRAL, "STOCH.RSI": NEUTRAL, "ADX": NEUTRAL, "STOCH.K": NEUTRAL, "AO": BUY, "UO": NEUTRAL, "W%R": NEUTRAL, "MOM": BUY}),
+##     moving_average: (recommendation: NEUTRAL, buy: 13, sell: 1, neutral: 2, compute: {"HullMA": NEUTRAL, "Ichimoku": NEUTRAL, "VMA": SELL, "EMA10": BUY}),
+##     oscillators: (recommendation: NEUTRAL, buy: 15, sell: 2, neutral: 10, compute: {:})
+##   )
