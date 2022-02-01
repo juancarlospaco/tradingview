@@ -1,6 +1,7 @@
 ## https://TradingView.com client.
 import std/[strutils, sequtils, sugar, json, tables, httpclient]
 
+
 type
   Recommendation* {.pure.} = enum      ## Buy or Sell ?.
     buy        = "BUY"
@@ -219,70 +220,84 @@ type
     CandleTriStarBullish = "Candle.TriStar.Bullish"
 
   TradingView* = object         ## TradingView client.
-    screener: Screener          ## Screener, currently only Crypto.
-    exchange: Exchange          ## Exchange to use, currently only Binance.
-    symbol: string              ## Symbol (e.g. "BTCUSDT", "ETHBUSD", "DOGEDAI", etc).
-    interval: Interval          ## Time interval to use (e.g. "1m", "5m", "15m", "30m", "1h", "2h", "4h", "1d", "1W", "1M").
-    timeout: Positive           ## Timeout.
+    screener:   Screener        ## Screener, currently only Crypto.
+    exchange:   Exchange        ## Exchange to use, currently only Binance.
+    symbol:     string          ## Symbol (e.g. "BTCUSDT", "ETHBUSD", "DOGEDAI", etc).
+    interval:   Interval        ## Time interval to use (e.g. "1m", "5m", "15m", "30m", "1h", "2h", "4h", "1d", "1W", "1M").
+    timeout:    Positive        ## Timeout.
     indicators: set[Indicators] ## Indicators to be used in the chart (e.g. "SMA", "EMA", "MACD", etc).
 
-  BaseAnalysis = object 
-    recommendation*: Recommendation
+  BaseAnalysis = object
+    recommendation*:    Recommendation
     buy, sell, neutral: int
-    compute: Table[string, Recommendation]
-    
-  Summary = BaseAnalysis
-  MovingAverage = BaseAnalysis
-  Oscillators = BaseAnalysis  
- 
-  Analysis = tuple[summary: Summary, moving_average: MovingAverage, oscillators: Oscillators]   
+    compute:            Table[string, Recommendation]
 
-const tradingviewAPIUrl: string = "https://scanner.tradingview.com/"
-const api_version: string = "3.2.10"
+  Summary       = BaseAnalysis
+  MovingAverage = BaseAnalysis
+  Oscillators   = BaseAnalysis
+
+  Analysis* = tuple[summary: Summary, moving_average: MovingAverage, oscillators: Oscillators]  ## Technical analysis.
+
+
+const
+  tradingviewAPIUrl: string = "https://scanner.tradingview.com/"
+  apiVersion: string = "3.2.10"
+
 
 template movingAverage*(ma, close: float): Recommendation =
   ## https://en.wikipedia.org/wiki/Moving_average
   if ma < close: Recommendation.buy elif ma > close: Recommendation.sell else: Recommendation.neutral
 
+
 template relativeStrengthIndex*(rsi, rsi1: float): Recommendation =
   ## https://en.wikipedia.org/wiki/Relative_strength_index
   if rsi < 30 and rsi1 < rsi: Recommendation.buy elif rsi > 70 and rsi1 > rsi: Recommendation.sell else: Recommendation.neutral
+
 
 template stochastic*(k, d, k1, d1: float): Recommendation =
   ## https://en.wikipedia.org/wiki/Stochastic_oscillator
   if k < 20 and d < 20 and k > d and k1 < d1: Recommendation.buy elif k > 80 and d > 80 and k < d and k1 > d1: Recommendation.sell else: Recommendation.neutral
 
+
 template commodityChannelIndex20*(cci20, cci201: float): Recommendation =
   ## https://en.wikipedia.org/wiki/Commodity_channel_index
   if cci20 < -100 and cci20 > cci201: Recommendation.buy elif cci20 > 100 and cci20 < cci201: Recommendation.sell else: Recommendation.neutral
+
 
 template averageDirectionalIndex*(adx, adxpdi, adxndi, adxpdi1, adxndi1: float): Recommendation =
   ## https://en.wikipedia.org/wiki/Average_directional_movement_index
   if adx > 20 and adxpdi1 < adxndi1 and adxpdi > adxndi: Recommendation.buy elif adx > 20 and adxpdi1 > adxndi1 and adxpdi < adxndi: Recommendation.sell else: Recommendation.neutral
 
+
 template movingAverageConvergenceDivergence*(macd, signal: float): Recommendation =
   ##  https://en.wikipedia.org/wiki/MACD
   if macd > signal: Recommendation.buy elif macd < signal: Recommendation.sell else: Recommendation.neutral
+
 
 template bullBearBuy*(close, bblower: float): Recommendation =
   ## https://en.wikipedia.org/wiki/Bull_and_bear_markets
   if close < bblower: Recommendation.buy else: Recommendation.neutral
 
+
 template bullBearSell*(close, bbupper: float): Recommendation =
   ## https://en.wikipedia.org/wiki/Bull_and_bear_markets
   if close > bbupper: Recommendation.sell else: Recommendation.neutral
+
 
 template parabolicStopAndReverse*(psar, open: float): Recommendation =
   ## https://en.wikipedia.org/wiki/Parabolic_SAR
   if psar < open: Recommendation.buy elif psar > open: Recommendation.sell else: Recommendation.neutral
 
+
 template momentum*(mom, mom1: float): Recommendation =
   if mom < mom1: Recommendation.sell elif mom > mom1: Recommendation.buy else: Recommendation.neutral
+
 
 func awesomeOscillator*(ao, ao1, ao2: float): Recommendation =
   if (ao > 0 and ao1 < 0) or (ao > 0 and ao1 > 0 and ao > ao1 and ao2 > ao1):   Recommendation.buy
   elif (ao < 0 and ao1 > 0) or (ao < 0 and ao1 < 0 and ao < ao1 and ao2 < ao1): Recommendation.sell
   else: Recommendation.neutral
+
 
 func recommend*(value: float): Recommendation =
   ## Generic basic recommendation.
@@ -291,6 +306,7 @@ func recommend*(value: float): Recommendation =
   elif value > 0.1 and value <= 0.5:   Recommendation.buy
   elif value > 0.5 and value <= 1:     Recommendation.strongBuy
   else:                                Recommendation.neutral
+
 
 template toString*(interval: Interval): string =
   ## `Interval` to `string` but in format `"|1"`, `"|60"`, `"|1W"`, `"|1M"`, etc.
@@ -306,9 +322,12 @@ template toString*(interval: Interval): string =
   of INTERVAL1MONTH:    "|1M"
   of INTERVAL1DAY:      ""  # Default is 1 day.
 
+
 func newTradingView*(symbol: string; timeout: Positive; interval = INTERVAL1DAY; indicators: set[Indicators]): TradingView {.inline.} =
   ## Constructor for `TradingView`.
+  assert symbol.len > 0, "Symbol must not be an empty string."
   TradingView(screener: Screener.Crypto, exchange: Exchange.Binance, symbol: symbol, interval: interval, timeout: timeout, indicators: indicators)
+
 
 func tradingViewData*(exchangeSymbols: seq[string]; indicators: set[Indicators]; interval: Interval): JsonNode =
   ## Format TradingView Scanner Post Data.
@@ -339,32 +358,32 @@ proc get_indicators(self: TradingView): Table[string,JsonNode] =
     data     = tradingViewData(@[exchange_symbol], self.indicators, self.interval)
     scan_url = tradingviewAPIUrl & toLowerAscii($self.screener) & "/scan"
     client   = newHttpClient()
-    headers  = newHttpHeaders({ "Content-Type": "application/json", "User-Agent": "tradingview_ta/" & api_version })
+    headers  = newHttpHeaders({ "Content-Type": "application/json", "User-Agent": "tradingview_ta/" & apiVersion })
     response = client.request(scan_url, headers = headers, httpMethod = HttpPOST, body = $data)
-    
+
   var err_msg = "Can't access TradingView's API. HTTP status code:" & $response.status & " Check for invalid symbol, exchange, or indicators."
 
   assert response.status != "200", err_msg
-  
+
   var json_data = parseJson(response.body)["data"]
 
-  result  = initTable[string,JsonNode]()
+  result  = initTable[string, JsonNode]()
 
   assert json_data != %*{}, "Json data is empty."
 
   for indicator in indicators: result[$indicator] = json_data[0]["d"][indicator.ord]
 
 
-proc calculate*(self: TradingView): Analysis = 
-  var 
+proc calculate*(self: TradingView): Analysis =
+  var
     oscillators_counter  = { "BUY": 0, "SELL": 0, "NEUTRAL": 0}.toTable
     ma_counter           = { "BUY": 0, "SELL": 0, "NEUTRAL": 0}.toTable
- 
+
     computed_oscillators = initTable[string,Recommendation]()
     computed_ma =  initTable[string,Recommendation]()
 
     indicators = get_indicators(self)
-    
+
     #indicators_val
     iv = toSeq(indicators.values).filter(x => x.kind == JFloat).map( x => x.getFloat )
 
@@ -372,7 +391,6 @@ proc calculate*(self: TradingView): Analysis =
     recommend_oscillators = recommend(iv[0])
     recommend_summary = recommend(iv[1])
     recommend_moving_averages = recommend(iv[2])
-
 
   #RSI
   computed_oscillators["RSI"] = relativeStrengthIndex(iv[3], iv[4])
@@ -398,7 +416,7 @@ proc calculate*(self: TradingView): Analysis =
   computed_oscillators["MOM"] = momentum(iv[18], iv[19])
   oscillators_counter[ $computed_oscillators["MOM"] ] += 1
 
-  #MACD 
+  #MACD
   computed_oscillators["MACD"] = movingAverageConvergenceDivergence(iv[20], iv[21])
   oscillators_counter[ $computed_oscillators["MACD"] ] += 1
 
@@ -418,7 +436,6 @@ proc calculate*(self: TradingView): Analysis =
   computed_oscillators["UO"] = recommend(iv[28])
   oscillators_counter[ $computed_oscillators["UO"] ] += 1
 
-
   # MOVING AVERAGES
   let ma_list = ["EMA10","SMA10","EMA20","SMA20","EMA30","SMA30","EMA50","SMA50","EMA100","SMA100","EMA200","SMA200"]
   let close = iv[30]
@@ -428,25 +445,32 @@ proc calculate*(self: TradingView): Analysis =
     computed_ma[ma_list[ma_list_counter]] = movingAverage(iv[index],close)
     ma_counter[ $computed_ma[ma_list[ma_list_counter] ] ] += 1
 
-
   # MOVING AVERAGES, pt 2
   # ICHIMOKU
-  computed_ma["Ichimoku"] = recommend(iv[45])  
+  computed_ma["Ichimoku"] = recommend(iv[45])
   ma_counter[ $computed_ma["Ichimoku"] ] += 1
 
   # VMA
-  computed_ma["VMA"] = recommend(iv[47])  
+  computed_ma["VMA"] = recommend(iv[47])
   ma_counter[ $computed_ma["VMA"] ] += 1
 
   # HullMA (9)
-  computed_ma["HullMA"] = recommend(iv[49])  
+  computed_ma["HullMA"] = recommend(iv[49])
   ma_counter[ $computed_ma["HullMA"] ] += 1
 
-  let 
+  let
     oscillators = Oscillators(recommendation: recommend_oscillators, buy: oscillators_counter["BUY"], sell: oscillators_counter["SELL"], neutral: oscillators_counter["NEUTRAL"], compute: computed_oscillators)
     moving_avg  = MovingAverage(recommendation: recommend_moving_averages, buy: ma_counter["BUY"], sell: ma_counter["SELL"], neutral: ma_counter["NEUTRAL"], compute: computed_ma)
     summary     = Summary(recommendation: recommend_summary, buy: oscillators.buy + moving_avg.buy, sell: oscillators.sell + moving_avg.sell, neutral: oscillators.neutral + moving_avg.neutral)
 
   (oscillators, moving_avg, summary)
-  
+
+
 proc getAnalysis*(self: TradingView): Analysis = self.calculate
+
+
+runnableExamples"-d:ssl -d:nimDisableCertificateValidation":
+  const indicators: set[Indicators] = { low(Indicators) .. high(Indicators) }
+  doAssert indicators.len == 180
+  let trading = newTradingView(symbol = "BTCUSDT", timeout = 999.Positive, indicators = indicators)
+  echo "BTCUSDT\n", trading.getAnalysis()
