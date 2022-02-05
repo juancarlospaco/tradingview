@@ -379,8 +379,8 @@ proc get_indicators(self: TradingView): tuple[data: OrderedTable[string,JsonNode
 
 proc calculate*(self: TradingView): Analysis =
   var
-    oscillators_counter  = { "BUY": 0, "SELL": 0, "NEUTRAL": 0, "STRONG_SELL":0, "STRONG_BUY":0 }.toTable
-    ma_counter           = { "BUY": 0, "SELL": 0, "NEUTRAL": 0, "STRONG_SELL":0, "STRONG_BUY":0 }.toTable
+    oscillators_counter  = {"STRONG_SELL": 0, "SELL": 0, "NEUTRAL": 0, "BUY": 0, "STRONG_BUY": 0}.toTable
+    ma_counter           = {"STRONG_SELL": 0, "SELL": 0, "NEUTRAL": 0, "BUY": 0, "STRONG_BUY": 0}.toTable
 
     computed_oscillators = initTable[string,Recommendation]()
     computed_ma =  initTable[string,Recommendation]()
