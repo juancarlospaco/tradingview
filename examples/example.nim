@@ -1,4 +1,4 @@
-import ../src/tradingview
+import tradingview
 
 var trading = newTradingView("1INCHUSDT_PREMIUM", 10_000, indicators = getIndicators())
 echo "1INCHUSDT_PREMIUM\n", $trading.getAnalysis().summary.recommendation & "\n"
