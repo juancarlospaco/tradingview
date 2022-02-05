@@ -292,12 +292,12 @@ template parabolicStopAndReverse*(psar, open: float): Recommendation =
 template momentum*(mom, mom1: float): Recommendation =
   if mom < mom1: Recommendation.sell elif mom > mom1: Recommendation.buy else: Recommendation.neutral
 
+func getIndicators*(): set[Indicators] = { low(Indicators) .. high(Indicators) }
 
 func awesomeOscillator*(ao, ao1, ao2: float): Recommendation =
   if (ao > 0 and ao1 < 0) or (ao > 0 and ao1 > 0 and ao > ao1 and ao2 > ao1):   Recommendation.buy
   elif (ao < 0 and ao1 > 0) or (ao < 0 and ao1 < 0 and ao < ao1 and ao2 < ao1): Recommendation.sell
   else: Recommendation.neutral
-
 
 func recommend*(value: float): Recommendation =
   ## Generic basic recommendation.
@@ -336,6 +336,7 @@ func tradingViewData*(exchangeSymbols: seq[string]; indicators: set[Indicators];
   assert indicators.len > 0, "indicators must not be a an empty seq."
   var columns: seq[string] = newSeqOfCap[string](indicators.len)
   for indicator in indicators: columns.add($indicator & interval.toString)
+  
   result = %*{
     "symbols": {
       "tickers": exchangeSymbols,
@@ -343,11 +344,11 @@ func tradingViewData*(exchangeSymbols: seq[string]; indicators: set[Indicators];
         "types": []
       }
     },
-    "columns": columns
+    "columns": columns,
   }
 
 
-proc get_indicators(self: TradingView): Table[string,JsonNode] =
+proc get_indicators(self: TradingView): tuple[data: OrderedTable[string,JsonNode], technical_rating:float ] =
   var indicators:set[Indicators] = {}
 
   if indicators.len == 0:
@@ -367,11 +368,13 @@ proc get_indicators(self: TradingView): Table[string,JsonNode] =
 
   var json_data = parseJson(response.body)["data"]
 
-  result  = initTable[string, JsonNode]()
+  var result_data  = initOrderedTable[string, JsonNode]()
 
   assert json_data != %*{}, "Json data is empty."
 
-  for indicator in indicators: result[$indicator] = json_data[0]["d"][indicator.ord]
+  for indicator in indicators: result_data[$indicator] = json_data[0]["d"][indicator.ord]
+ 
+  (result_data, json_data[0]["d"][RecommendAll.ord].getFloat)
 
 
 proc calculate*(self: TradingView): Analysis =
@@ -385,11 +388,11 @@ proc calculate*(self: TradingView): Analysis =
     indicators = get_indicators(self)
 
     #indicators_val
-    iv = toSeq(indicators.values).filter(x => x.kind == JFloat).map( x => x.getFloat )
+    iv = toSeq(indicators.data.values).filter(x => x.kind == JFloat).map( x => x.getFloat )
 
     #Recommendation
     recommend_oscillators = recommend(iv[0])
-    recommend_summary = recommend(iv[1])
+    recommend_summary = recommend(indicators.technical_rating)
     recommend_moving_averages = recommend(iv[2])
 
   #RSI
@@ -444,6 +447,7 @@ proc calculate*(self: TradingView): Analysis =
   for index in 33 .. 45:
     computed_ma[ma_list[ma_list_counter]] = movingAverage(iv[index],close)
     ma_counter[ $computed_ma[ma_list[ma_list_counter] ] ] += 1
+    ma_list_counter += 1
 
   # MOVING AVERAGES, pt 2
   # ICHIMOKU
@@ -463,7 +467,7 @@ proc calculate*(self: TradingView): Analysis =
     moving_avg  = MovingAverage(recommendation: recommend_moving_averages, buy: ma_counter["BUY"], sell: ma_counter["SELL"], neutral: ma_counter["NEUTRAL"], compute: computed_ma)
     summary     = Summary(recommendation: recommend_summary, buy: oscillators.buy + moving_avg.buy, sell: oscillators.sell + moving_avg.sell, neutral: oscillators.neutral + moving_avg.neutral)
 
-  (oscillators, moving_avg, summary)
+  (summary, moving_avg, oscillators)
 
 
 proc getAnalysis*(self: TradingView): Analysis = self.calculate
