@@ -444,8 +444,8 @@ proc calculate*(self: TradingView): Analysis =
   let close = iv[30]
   var ma_list_counter = 0
 
-  for index in 33 .. 45:
-    computed_ma[ma_list[ma_list_counter]] = movingAverage(iv[index],close)
+  for index in 33 ..< 45:
+    computed_ma[ma_list[ma_list_counter]] = movingAverage(iv[index], close)
     ma_counter[ $computed_ma[ma_list[ma_list_counter] ] ] += 1
     ma_list_counter += 1
 
