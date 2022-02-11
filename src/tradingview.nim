@@ -1,5 +1,5 @@
 ## https://TradingView.com client.
-import std/[strutils, sequtils, sugar, json, tables, httpclient]
+import std/[sequtils, sugar, json, tables, httpclient]
 
 
 type
@@ -23,10 +23,10 @@ type
     INTERVAL1MONTH    = "1M"
 
   Screener* {.pure.} = enum   ## Screeners, currently only Crypto.
-    Crypto  = "CRYPTO"        ## Crypto currencies.
-    Forex   = "FOREX"         ## Forex (untested).
-    America = "AMERICA"       ## USA Market (untested).
-    Cfd     = "CFD"           ## Contract For Differences (untested).
+    Crypto  = "crypto"        ## Crypto currencies.
+    Forex   = "forex"         ## Forex (untested).
+    America = "america"       ## USA Market (untested).
+    Cfd     = "cfd"           ## Contract For Differences (untested).
 
   Exchange* {.pure.} = enum   ## Exchanges, currently only Binance.
     Binance  = "BINANCE"      ## Crypto currencies.
@@ -354,12 +354,10 @@ proc get_indicators(self: TradingView): tuple[data: OrderedTable[string, JsonNod
     indicators = self.indicators
 
   let
-    exchange_symbol = $self.exchange & ':' & self.symbol
-    data     = tradingViewData(@[exchange_symbol], self.indicators, self.interval)
-    scan_url = tradingviewAPIUrl & toLowerAscii($self.screener) & "/scan"
+    data     = tradingViewData(@[$self.exchange & ':' & self.symbol], self.indicators, self.interval)
     client   = newHttpClient()
     headers  = newHttpHeaders({ "Content-Type": "application/json", "User-Agent": "tradingview_ta/" & apiVersion })
-    response = client.request(scan_url, headers = headers, httpMethod = HttpPOST, body = $data)
+    response = client.request(tradingviewAPIUrl & $self.screener & "/scan", headers = headers, httpMethod = HttpPOST, body = $data)
 
   assert response.status != "200", "Can not access TradingView API, check for invalid symbol, exchange, or indicators. HTTP status code: " & $response.status
 
