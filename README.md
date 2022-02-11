@@ -14,6 +14,6 @@
 
 ```nim
 import tradingview
-let trading = newTradingView("BTCUSDT", 999, indicators = getIndicators())
+let trading = newTradingView("BTCUSDT", getIndicators())
 echo trading.getAnalysis()
 ```
