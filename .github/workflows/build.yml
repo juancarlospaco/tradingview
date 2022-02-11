@@ -1,0 +1,41 @@
+name: Build
+on: [push, pull_request]
+
+jobs:
+  build:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:       [ubuntu-latest, windows-latest]
+        architecture:   [x64, x86]
+        nim-channel:    [stable, devel]
+    name: ${{ matrix.platform }}-${{ matrix.architecture }}-${{ matrix.nim-channel }}
+    runs-on: ${{ matrix.platform }}
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set Environment Variables
+      uses: allenevans/set-env@v2.0.0
+      with:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        CMD: "nim doc -d:nimStrictDelete -d:nimPreviewFloatRoundtrip -d:nimPreviewDotLikeOps --gc:orc --index:on --project --experimental:strictEffects --experimental:strictFuncs --styleCheck:usages --styleCheck:hint --outdir:../../docs"
+
+    - uses: jiro4989/setup-nim-action@v1.0.2
+      with:
+        nim-version: ${{ matrix.nim-channel }}
+
+    - name: Build docs
+      shell: bash
+      run: |
+        cd src
+        for i in *.nim; do
+          $CMD $i
+        done
+
+    - name: Clean out
+      shell: bash
+      run: |
+        rm --verbose --force --recursive docs/*.idx
+        rm --verbose --force --recursive docs/nimcache/*.*
+        rm --verbose --force --recursive docs/nimcache/runnableExamples/*.*
