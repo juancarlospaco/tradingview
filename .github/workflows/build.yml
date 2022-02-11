@@ -19,7 +19,7 @@ jobs:
       uses: allenevans/set-env@v2.0.0
       with:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-        CMD: "nim doc -d:nimStrictDelete -d:nimPreviewFloatRoundtrip -d:nimPreviewDotLikeOps --gc:orc --index:on --project --experimental:strictEffects --experimental:strictFuncs --styleCheck:usages --styleCheck:hint --outdir:../../docs"
+        CMD: "nim doc -d:ssl -d:nimDisableCertificateValidation -d:nimStrictDelete -d:nimPreviewFloatRoundtrip -d:nimPreviewDotLikeOps --gc:orc --index:on --project --experimental:strictEffects --experimental:strictFuncs --styleCheck:usages --styleCheck:hint --outdir:../../docs"
 
     - uses: jiro4989/setup-nim-action@v1.0.2
       with:
@@ -32,6 +32,10 @@ jobs:
         for i in *.nim; do
           $CMD $i
         done
+
+    - name: Build Examples
+      shell: bash
+      run: nim c -d:ssl -d:nimDisableCertificateValidation examples/example.nim
 
     - name: Clean out
       shell: bash
