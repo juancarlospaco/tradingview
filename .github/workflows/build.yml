@@ -35,7 +35,9 @@ jobs:
 
     - name: Build Examples
       shell: bash
-      run: nim c -d:ssl -d:nimDisableCertificateValidation examples/example.nim
+      run: |
+        cd src
+        nim c -d:ssl -d:nimDisableCertificateValidation ../examples/example.nim
 
     - name: Clean out
       shell: bash
