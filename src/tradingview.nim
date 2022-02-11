@@ -329,14 +329,14 @@ func newTradingView*(symbol: string; timeout: Positive; interval = INTERVAL1DAY;
   TradingView(screener: Screener.Crypto, exchange: Exchange.Binance, symbol: symbol, interval: interval, timeout: timeout, indicators: indicators)
 
 
-func tradingViewData*(exchangeSymbols: seq[string]; indicators: set[Indicators]; interval: Interval): JsonNode =
+proc tradingViewData*(exchangeSymbols: seq[string]; indicators: set[Indicators]; interval: Interval): JsonNode =
   ## Format TradingView Scanner Post Data.
   ## * `exchangeSymbols` example `@["BINANCE:BTCUSDT", "BINANCE:ETHBUSD"]`, indicators must be all uppercase.
   assert exchangeSymbols.len > 0, "exchangeSymbols must not be a an empty seq."
   assert indicators.len > 0, "indicators must not be a an empty seq."
   var columns: seq[string] = newSeqOfCap[string](indicators.len)
   for indicator in indicators: columns.add($indicator & interval.toString)
-  
+
   result = %*{
     "symbols": {
       "tickers": exchangeSymbols,
@@ -373,7 +373,7 @@ proc get_indicators(self: TradingView): tuple[data: OrderedTable[string,JsonNode
   assert json_data != %*{}, "Json data is empty."
 
   for indicator in indicators: result_data[$indicator] = json_data[0]["d"][indicator.ord]
- 
+
   (result_data, json_data[0]["d"][RecommendAll.ord].getFloat)
 
 
