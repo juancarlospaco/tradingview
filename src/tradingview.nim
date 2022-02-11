@@ -239,9 +239,7 @@ type
   Analysis* = tuple[summary: Summary, moving_average: MovingAverage, oscillators: Oscillators]  ## Technical analysis.
 
 
-const
-  tradingviewAPIUrl: string = "https://scanner.tradingview.com/"
-  apiVersion: string = "3.2.10"
+const tradingviewAPIUrl: string = "https://scanner.tradingview.com/"
 
 
 template movingAverage*(ma, close: float): Recommendation =
@@ -353,11 +351,9 @@ proc get_indicators(self: TradingView): tuple[data: OrderedTable[string, JsonNod
   if indicators.len == 0:
     indicators = self.indicators
 
-  let
-    data     = tradingViewData(@[$self.exchange & ':' & self.symbol], self.indicators, self.interval)
-    client   = newHttpClient()
-    headers  = newHttpHeaders({ "Content-Type": "application/json", "User-Agent": "tradingview_ta/" & apiVersion })
-    response = client.request(tradingviewAPIUrl & $self.screener & "/scan", headers = headers, httpMethod = HttpPOST, body = $data)
+  let client   = newHttpClient()
+  let response = client.request(tradingviewAPIUrl & $self.screener & "/scan", httpMethod = HttpPOST, body = $tradingViewData(@[$self.exchange & ':' & self.symbol], self.indicators, self.interval))
+  client.close()
 
   assert response.status != "200", "Can not access TradingView API, check for invalid symbol, exchange, or indicators. HTTP status code: " & $response.status
 
