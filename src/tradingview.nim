@@ -439,6 +439,7 @@ proc calculate*(self: TradingView): Analysis =
   computed_oscillators["UO"] = recommend(iv[28])
   oscillators_counter[ $computed_oscillators["UO"] ] += 1
 
+
   # MOVING AVERAGES
   let ma_list = ["EMA10","SMA10","EMA20","SMA20","EMA30","SMA30","EMA50","SMA50","EMA100","SMA100","EMA200","SMA200"]
   let close = iv[30]
