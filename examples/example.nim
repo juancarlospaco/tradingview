@@ -1,17 +1,16 @@
 import tradingview
 
 var trading = newTradingView("1INCHUSDT_PREMIUM", 10_000, indicators = getIndicators())
-echo "1INCHUSDT_PREMIUM\n", $trading.getAnalysis().summary.recommendation & "\n"
+echo "\n1INCHUSDT_PREMIUM\t", trading.getAnalysis().summary.recommendation
 
 trading = newTradingView("BTCUSDT", 10_000, indicators = getIndicators())
-echo "BTCUSDT\n", $trading.getAnalysis().summary.recommendation & "\n"
+echo "\nBTCUSDT\t", trading.getAnalysis().summary.recommendation
 
 trading = newTradingView("AAVEBTC", 10_000, indicators = getIndicators())
-echo "AAVEBTC\n", $trading.getAnalysis().summary.recommendation & "\n"
+echo "\nAAVEBTC\t", trading.getAnalysis().summary.recommendation
 
 trading = newTradingView("ACMUSD", 10_000, indicators = getIndicators())
-echo "ACMUSD\n", $trading.getAnalysis().summary.recommendation & "\n"
+echo "\nACMUSD\t", trading.getAnalysis().summary.recommendation
 
 trading = newTradingView("1000SHIBUSDTPERP", 10_000, indicators = getIndicators())
-echo "1000SHIBUSDTPERP\n", $trading.getAnalysis().summary.recommendation & "\n"
-
+echo "\n000SHIBUSDTPERP\t", trading.getAnalysis().summary.recommendation
