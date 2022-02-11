@@ -297,7 +297,7 @@ func getIndicators*(): set[Indicators] = { low(Indicators) .. high(Indicators) }
 func awesomeOscillator*(ao, ao1, ao2: float): Recommendation =
   if (ao > 0 and ao1 < 0) or (ao > 0 and ao1 > 0 and ao > ao1 and ao2 > ao1):   Recommendation.buy
   elif (ao < 0 and ao1 > 0) or (ao < 0 and ao1 < 0 and ao < ao1 and ao2 < ao1): Recommendation.sell
-  else: Recommendation.neutral
+  else:                                                                         Recommendation.neutral
 
 func recommend*(value: float): Recommendation =
   ## Generic basic recommendation.
@@ -336,7 +336,6 @@ proc tradingViewData*(exchangeSymbols: seq[string]; indicators: set[Indicators];
   assert indicators.len > 0, "indicators must not be a an empty seq."
   var columns: seq[string] = newSeqOfCap[string](indicators.len)
   for indicator in indicators: columns.add($indicator & interval.toString)
-
   result = %*{
     "symbols": {
       "tickers": exchangeSymbols,
@@ -348,8 +347,8 @@ proc tradingViewData*(exchangeSymbols: seq[string]; indicators: set[Indicators];
   }
 
 
-proc get_indicators(self: TradingView): tuple[data: OrderedTable[string,JsonNode], technical_rating:float ] =
-  var indicators:set[Indicators] = {}
+proc get_indicators(self: TradingView): tuple[data: OrderedTable[string, JsonNode], technical_rating: float] =
+  var indicators: set[Indicators] = {}
 
   if indicators.len == 0:
     indicators = self.indicators
@@ -362,15 +361,13 @@ proc get_indicators(self: TradingView): tuple[data: OrderedTable[string,JsonNode
     headers  = newHttpHeaders({ "Content-Type": "application/json", "User-Agent": "tradingview_ta/" & apiVersion })
     response = client.request(scan_url, headers = headers, httpMethod = HttpPOST, body = $data)
 
-  var err_msg = "Can't access TradingView's API. HTTP status code:" & $response.status & " Check for invalid symbol, exchange, or indicators."
-
-  assert response.status != "200", err_msg
+  assert response.status != "200", "Can not access TradingView API, check for invalid symbol, exchange, or indicators. HTTP status code: " & $response.status
 
   var json_data = parseJson(response.body)["data"]
 
   var result_data  = initOrderedTable[string, JsonNode]()
 
-  assert json_data != %*{}, "Json data is empty."
+  assert json_data != %*{}, "JSON data is empty."
 
   for indicator in indicators: result_data[$indicator] = json_data[0]["d"][indicator.ord]
 
@@ -382,13 +379,13 @@ proc calculate*(self: TradingView): Analysis =
     oscillators_counter  = {"STRONG_SELL": 0, "SELL": 0, "NEUTRAL": 0, "BUY": 0, "STRONG_BUY": 0}.toTable
     ma_counter           = {"STRONG_SELL": 0, "SELL": 0, "NEUTRAL": 0, "BUY": 0, "STRONG_BUY": 0}.toTable
 
-    computed_oscillators = initTable[string,Recommendation]()
-    computed_ma =  initTable[string,Recommendation]()
+    computed_oscillators = initTable[string, Recommendation]()
+    computed_ma =  initTable[string, Recommendation]()
 
     indicators = get_indicators(self)
 
     #indicators_val
-    iv = toSeq(indicators.data.values).filter(x => x.kind == JFloat).map( x => x.getFloat )
+    iv = toSeq(indicators.data.values).filter(x => x.kind == JFloat).map(x => x.getFloat)
 
     #Recommendation
     recommend_oscillators = recommend(iv[0])
@@ -440,7 +437,7 @@ proc calculate*(self: TradingView): Analysis =
   oscillators_counter[ $computed_oscillators["UO"] ] += 1
 
   # MOVING AVERAGES
-  let ma_list = ["EMA10","SMA10","EMA20","SMA20","EMA30","SMA30","EMA50","SMA50","EMA100","SMA100","EMA200","SMA200"]
+  const ma_list = ["EMA10", "SMA10", "EMA20", "SMA20", "EMA30", "SMA30", "EMA50", "SMA50", "EMA100", "SMA100", "EMA200", "SMA200"]
   let close = iv[30]
   var ma_list_counter = 0
 
@@ -470,7 +467,7 @@ proc calculate*(self: TradingView): Analysis =
   (summary, moving_avg, oscillators)
 
 
-proc getAnalysis*(self: TradingView): Analysis = self.calculate
+proc getAnalysis*(self: TradingView): Analysis {.inline.} = self.calculate
 
 
 runnableExamples"-d:ssl -d:nimDisableCertificateValidation":
