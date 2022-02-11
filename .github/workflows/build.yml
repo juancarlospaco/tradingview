@@ -37,7 +37,7 @@ jobs:
       shell: bash
       run: |
         cp src/tradingview.nim examples/tradingview.nim
-        nim c -d:ssl -d:nimDisableCertificateValidation examples/example.nim
+        nim c -d:ssl -d:nimDisableCertificateValidation --experimental:strictEffects --experimental:strictFuncs --styleCheck:usages --styleCheck:hint examples/example.nim
 
     - name: Clean out
       shell: bash
