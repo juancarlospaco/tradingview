@@ -323,7 +323,7 @@ template toString*(interval: Interval): string =
   of INTERVAL1DAY:      ""  # Default is 1 day.
 
 
-func newTradingView*(symbol: string; timeout: Positive; interval = INTERVAL1DAY; indicators: set[Indicators]): TradingView {.inline.} =
+func newTradingView*(symbol: string; indicators: set[Indicators]; timeout = 10_000.Positive; interval = INTERVAL1DAY): TradingView {.inline.} =
   ## Constructor for `TradingView`.
   assert symbol.len > 0, "Symbol must not be an empty string."
   TradingView(screener: Screener.Crypto, exchange: Exchange.Binance, symbol: symbol, interval: interval, timeout: timeout, indicators: indicators)
