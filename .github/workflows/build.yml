@@ -36,7 +36,7 @@ jobs:
     - name: Build Examples
       shell: bash
       run: |
-        copy src/tradingview.nim examples/tradingview.nim
+        cp src/tradingview.nim examples/tradingview.nim
         nim c -d:ssl -d:nimDisableCertificateValidation examples/example.nim
 
     - name: Clean out
