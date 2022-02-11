@@ -13,4 +13,4 @@ trading = newTradingView("ACMUSD", getIndicators())
 echo "\nACMUSD\t", trading.getAnalysis().summary.recommendation
 
 trading = newTradingView("1000SHIBUSDTPERP", getIndicators())
-echo "\n000SHIBUSDTPERP\t", trading.getAnalysis().summary.recommendation
+echo "\n1000SHIBUSDTPERP\t", trading.getAnalysis().summary.recommendation
