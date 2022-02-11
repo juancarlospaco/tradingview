@@ -8,3 +8,12 @@
 - https://github.com/juancarlospaco/tradingview/blob/nim/examples/example.nim#L6-LL7
 
 ![](https://github.com/juancarlospaco/tradingview/actions/workflows/build.yml/badge.svg)
+
+
+# Example
+
+```nim
+import tradingview
+let trading = newTradingView("BTCUSDT", 999, indicators = getIndicators())
+echo trading.getAnalysis()
+```
