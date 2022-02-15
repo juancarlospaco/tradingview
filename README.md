@@ -25,11 +25,11 @@ echo trading.getAnalysis()
 ```
 
 
-# Stars
-
-![](https://starchart.cc/juancarlospaco/tradingview.svg)
-
-
 # More
 
 - See also https://github.com/juancarlospaco/binance#binance
+
+
+# Stars
+
+![](https://starchart.cc/juancarlospaco/tradingview.svg)
