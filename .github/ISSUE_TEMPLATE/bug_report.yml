@@ -381,6 +381,13 @@ body:
     placeholder: Bug reports with full repro code and detailed information will be fixed faster.
     render: shell
 
+- type: textarea
+  id: expected
+  attributes:
+    label: Expected Output
+    description: Whats the expected output?.
+    render: shell
+
 - type: markdown
   attributes:
     value: |
