@@ -34,3 +34,4 @@ echo trading.getAnalysis()
 
 ![](https://starchart.cc/juancarlospaco/tradingview.svg)
 :star: [@juancarlospaco](https://github.com/juancarlospaco '2022-02-15')	
+:star: [@Nacho512](https://github.com/Nacho512 '2022-02-20')	
