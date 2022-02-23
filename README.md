@@ -25,6 +25,20 @@ echo trading.getAnalysis()
 ```
 
 
+# Technical Analysis Indicators
+
+- Moving Average.
+- Relative Strength Index.
+- Stochastic Oscillator.
+- Commodity Channel Index.
+- Average Directional Movement Index.
+- Moving Average Convergence Divergence.
+- Parabolic Stop And Reverse.
+- Awesome Oscillator.
+- Bull-Bear Buy, Bull-Bear Sell.
+- Momentum.
+
+
 # More
 
 - See also https://github.com/juancarlospaco/binance#binance
@@ -33,5 +47,5 @@ echo trading.getAnalysis()
 # Stars
 
 ![](https://starchart.cc/juancarlospaco/tradingview.svg)
-:star: [@juancarlospaco](https://github.com/juancarlospaco '2022-02-15')	
-:star: [@Nacho512](https://github.com/Nacho512 '2022-02-20')	
+:star: [@juancarlospaco](https://github.com/juancarlospaco '2022-02-15')
+:star: [@Nacho512](https://github.com/Nacho512 '2022-02-20')
