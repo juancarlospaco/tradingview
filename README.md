@@ -42,7 +42,7 @@ echo trading.getAnalysis()
 
 # Performance
 
-Calculations of these indicators are approx 900% Faster than the usual industry way of calculating these indicators using Python or JavaScript.
+- Indicators are approx 900% Faster than the usual industry way using Python or JavaScript.
 
 
 # More
