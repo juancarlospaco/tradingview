@@ -290,7 +290,7 @@ template parabolicStopAndReverse*(psar, open: float): Recommendation =
 template momentum*(mom, mom1: float): Recommendation =
   if mom < mom1: Recommendation.sell elif mom > mom1: Recommendation.buy else: Recommendation.neutral
 
-func getIndicators*(): set[Indicators] = { low(Indicators) .. high(Indicators) }
+func getIndicators*(): set[Indicators] {.inline.} = { low(Indicators) .. high(Indicators) }
 
 func awesomeOscillator*(ao, ao1, ao2: float): Recommendation =
   if (ao > 0 and ao1 < 0) or (ao > 0 and ao1 > 0 and ao > ao1 and ao2 > ao1):   Recommendation.buy
@@ -299,10 +299,10 @@ func awesomeOscillator*(ao, ao1, ao2: float): Recommendation =
 
 func recommend*(value: float): Recommendation =
   ## Generic basic recommendation.
-  if value >= -1.0 and value < -0.5:   Recommendation.strongSell
+  if   value >= -1.0 and value < -0.5: Recommendation.strongSell
   elif value >= -0.5 and value < -0.1: Recommendation.sell
-  elif value > 0.1 and value <= 0.5:   Recommendation.buy
-  elif value > 0.5 and value <= 1:     Recommendation.strongBuy
+  elif value > 0.1   and value <= 0.5: Recommendation.buy
+  elif value > 0.5   and value <= 1:   Recommendation.strongBuy
   else:                                Recommendation.neutral
 
 
