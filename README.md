@@ -36,12 +36,19 @@ echo trading.getAnalysis()
 - Parabolic Stop And Reverse.
 - Awesome Oscillator.
 - Bull-Bear Buy, Bull-Bear Sell.
+- Generic Recommendation.
 - Momentum.
+
+
+# Performance
+
+Calculations of these indicators are approx 900% Faster than the usual industry way of calculating these indicators using Python or JavaScript.
 
 
 # More
 
 - See also https://github.com/juancarlospaco/binance#binance
+- See also https://github.com/juancarlospaco/cloudbet#cloudbet
 
 
 # Stars
